@@ -39,7 +39,6 @@
     "expo-secure-store": "^12.3.0",
   "expo-av": "^13.2.0",
   "expo-file-system": "^15.2.2",
-  "expo-sharing": "^12.2.1",
     "react-native-document-picker": "^11.3.1",
     "react-native-file-viewer": "^2.3.4",
     "@reduxjs/toolkit": "^1.9.5"
