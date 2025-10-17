@@ -1,0 +1,53 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = "file:./dev.db"
+}
+
+model User {
+  id        String   @id @default(cuid())
+  externalId String? 
+  email     String   @unique
+  name      String?
+  wallet    Wallet?
+  createdAt DateTime @default(now())
+}
+
+model Wallet {
+  id        String  @id @default(cuid())
+  user      User    @relation(fields: [userId], references: [id])
+  userId    String  @unique
+  balanceNGN Int     @default(0)
+  balanceUSD Int     @default(0)
+  updatedAt DateTime @updatedAt
+}
+
+model Transaction {
+  id          String   @id @default(cuid())
+  reference   String   @unique
+  provider    String
+  amountUSD   Int
+  amountNGN   Int
+  status      String
+  meta        Json?
+  createdAt   DateTime @default(now())
+}
+
+model Recipient {
+  id          String   @id @default(cuid())
+  user        User?    @relation(fields: [userId], references: [id])
+  userId      String?
+  recipientCode String
+  details     Json?
+}
+
+model WebhookLog {
+  id        String   @id @default(cuid())
+  provider  String
+  event     String
+  payload   Json
+  createdAt DateTime @default(now())
+}

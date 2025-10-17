@@ -1,0 +1,6 @@
+nohup: ignoring input
+
+> glueblue-server@0.1.0 start
+> node index.js
+
+Server running on 3000
