@@ -3,11 +3,11 @@ import { View, Text, TextInput, Button, StyleSheet } from 'react-native';
 import { createRecipient } from '../services/payments';
 import { useSelector } from 'react-redux';
 
-const CreateRecipient = ({ navigation }) => {
+const CreateRecipient = ({ navigation }: any) => {
   const [name, setName] = useState('');
   const [account, setAccount] = useState('');
   const [bankCode, setBankCode] = useState('');
-  const auth = useSelector((s) => s.auth);
+  const auth = useSelector((s: any) => s.auth);
 
   const handleCreate = async () => {
     const userId = auth.user?.id || 'devuser';

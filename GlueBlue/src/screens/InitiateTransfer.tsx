@@ -3,11 +3,11 @@ import { View, Text, TextInput, Button, StyleSheet, FlatList, TouchableOpacity }
 import { initiateTransfer, fetchRecipients } from '../services/payments';
 import { useSelector } from 'react-redux';
 
-const InitiateTransfer = ({ navigation }) => {
+const InitiateTransfer = ({ navigation }: any) => {
   const [amount, setAmount] = useState('');
   const [recipients, setRecipients] = useState([]);
   const [selected, setSelected] = useState(null);
-  const auth = useSelector((s) => s.auth);
+  const auth = useSelector((s: any) => s.auth);
 
   useEffect(() => {
     (async () => {

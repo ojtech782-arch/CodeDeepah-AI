@@ -3,9 +3,9 @@ import { View, Text, TextInput, Button, StyleSheet } from 'react-native';
 import { createPaystackTransaction } from '../services/payments';
 import { useSelector } from 'react-redux';
 
-const FundWallet = ({ navigation }) => {
+const FundWallet = ({ navigation }: any) => {
   const [amount, setAmount] = useState('');
-  const auth = useSelector((s) => s.auth);
+  const auth = useSelector((s: any) => s.auth);
 
   const handleFund = async () => {
     const userId = auth.user?.id || 'devuser';

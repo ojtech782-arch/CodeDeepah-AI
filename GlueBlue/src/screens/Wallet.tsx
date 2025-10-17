@@ -4,16 +4,16 @@ import { useDispatch, useSelector } from 'react-redux';
 import { fetchWalletData, fetchTransactions, selectWallet } from '../store/slices/walletSlice';
 import { convertCurrency } from '../utils/currency';
 
-const Wallet = () => {
+const Wallet = ({ navigation }: any) => {
   const dispatch = useDispatch();
-  const walletData = useSelector(selectWallet);
+  const walletData = useSelector((s: any) => selectWallet(s));
 
   useEffect(() => {
     dispatch(fetchWalletData());
     dispatch(fetchTransactions());
   }, [dispatch]);
 
-  const handleCurrencyConversion = (amount, currency) => {
+  const handleCurrencyConversion = (amount: any, currency: any) => {
     return convertCurrency(amount, currency);
   };
 
@@ -22,8 +22,8 @@ const Wallet = () => {
       <Text style={styles.title}>Wallet</Text>
       <FlatList
         data={walletData.transactions}
-        keyExtractor={(item) => item.id.toString()}
-        renderItem={({ item }) => (
+        keyExtractor={(item: any) => item.id.toString()}
+        renderItem={({ item }: { item: any }) => (
           <View style={styles.transaction}>
             <Text>{item.description}</Text>
             <Text>{handleCurrencyConversion(item.amount, item.currency)}</Text>

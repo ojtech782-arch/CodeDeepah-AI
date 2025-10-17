@@ -1,7 +1,7 @@
 import axios from 'axios';
 import { API_URL, PAYSTACK_PUBLIC_KEY, PAYPAL_CLIENT_ID } from '../config/env';
 
-export async function createPaystackTransaction(userId: string, amountUSD: number, email: string, callback_url?: string) {
+export async function createPaystackTransaction({ userId, amountUSD, email, callback_url }: any) {
   // The backend will convert USD->NGN, initialize Paystack transaction and return authorization URL
   const res = await axios.post(`${API_URL}/payments/paystack/create`, { userId, amountUSD, email, callback_url });
   return res.data; // { authorization_url, reference }

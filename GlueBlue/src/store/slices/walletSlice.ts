@@ -29,16 +29,16 @@ const walletSlice = createSlice({
     name: 'wallet',
     initialState,
     reducers: {
-        setBalance(state, action: PayloadAction<number>) {
+        setBalance(state: WalletState, action: PayloadAction<number>) {
             state.balance = action.payload;
         },
-        addTransaction(state, action: PayloadAction<{ id: string; amount: number; currency: string; date: string }>) {
+        addTransaction(state: WalletState, action: PayloadAction<{ id: string; amount: number; currency: string; date: string }>) {
             state.transactions.push(action.payload);
         },
-        clearTransactions(state) {
+        clearTransactions(state: WalletState) {
             state.transactions = [];
         },
-        convertCurrency(state, action: PayloadAction<{ amount: number; fromCurrency: string; toCurrency: string }>) {
+        convertCurrency(state: WalletState, action: PayloadAction<{ amount: number; fromCurrency: string; toCurrency: string }>) {
             // Logic for currency conversion can be implemented here
         },
     },

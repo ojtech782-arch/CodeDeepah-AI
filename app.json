@@ -1,0 +1,12 @@
+{
+  "expo": {
+    "extra": {
+      "eas": {
+        "projectId": "cd051660-2584-4cd9-b601-c1877e23d58a"
+      }
+    },
+    "android": {
+      "package": "com.pomariosainjustin.codedeepahaimonorepo"
+    }
+  }
+}

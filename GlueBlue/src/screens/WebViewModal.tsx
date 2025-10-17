@@ -2,7 +2,7 @@ import React from 'react';
 import { View, StyleSheet } from 'react-native';
 import { WebView } from 'react-native-webview';
 
-const WebViewModal = ({ route, navigation }) => {
+const WebViewModal = ({ route, navigation }: any) => {
   const { url, reference } = route.params || {};
   return (
     <View style={styles.container}>

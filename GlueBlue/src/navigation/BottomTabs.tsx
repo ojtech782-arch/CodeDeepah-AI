@@ -28,35 +28,35 @@ const BottomTabs = () => {
         name="Home" 
         component={HomeScreen} 
         options={{
-          tabBarIcon: ({ color }) => <Icon name="home" color={color} />,
+          tabBarIcon: ({ color }: { color: string }) => <Icon name="home" color={color} />,
         }} 
       />
       <Tab.Screen 
         name="Messaging" 
         component={MessagingScreen} 
         options={{
-          tabBarIcon: ({ color }) => <Icon name="message-circle" color={color} />,
+          tabBarIcon: ({ color }: { color: string }) => <Icon name="message-circle" color={color} />,
         }} 
       />
       <Tab.Screen 
         name="Notifications" 
         component={NotificationsScreen} 
         options={{
-          tabBarIcon: ({ color }) => <Icon name="bell" color={color} />,
+          tabBarIcon: ({ color }: { color: string }) => <Icon name="bell" color={color} />,
         }} 
       />
       <Tab.Screen 
         name="Wallet" 
         component={WalletScreen} 
         options={{
-          tabBarIcon: ({ color }) => <Icon name="credit-card" color={color} />,
+          tabBarIcon: ({ color }: { color: string }) => <Icon name="credit-card" color={color} />,
         }} 
       />
       <Tab.Screen 
         name="Dashboard" 
         component={DashboardScreen} 
         options={{
-          tabBarIcon: ({ color }) => <Icon name="bar-chart" color={color} />,
+          tabBarIcon: ({ color }: { color: string }) => <Icon name="bar-chart" color={color} />,
         }} 
       />
     </Tab.Navigator>
