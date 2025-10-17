@@ -6,7 +6,7 @@ const WebViewModal = ({ route, navigation }: any) => {
   const { url, reference } = route.params || {};
   return (
     <View style={styles.container}>
-      <WebView source={{ uri: url }} onNavigationStateChange={(navState) => {
+      <WebView source={{ uri: url }} onNavigationStateChange={(navState: any) => {
         // could detect callback url and close
       }} />
     </View>

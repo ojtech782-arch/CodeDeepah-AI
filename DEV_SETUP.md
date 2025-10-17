@@ -100,3 +100,22 @@ npm run eas:submit:ios
 Notes:
 - You will need to configure credentials in EAS (keystore for Android, provisioning profile/certificate for iOS) — `eas build` and `eas submit` interactive flows will guide you.
 - Keep `.easignore` updated to exclude sensitive files (I added a basic `.easignore` file).
+
+Monorepo (GlueBlue in a subfolder)
+---------------------------------
+If your Expo app lives in `GlueBlue/` (monorepo), you can run EAS from the repo root by adding a root `eas.json` that sets `workingDirectory: "./GlueBlue"` for each profile. I added a root `eas.json` which does exactly that for `preview` and `production`.
+
+Then run from the root:
+
+```bash
+# build using the root eas.json which points to GlueBlue
+eas build --platform android --profile preview --local
+```
+
+Or use the helper script added to the repo root:
+
+```bash
+./build-android.sh
+```
+
+This script auto-installs `expo` if missing and runs the local EAS build in the `GlueBlue` working directory.
