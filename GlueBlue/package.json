@@ -8,6 +8,11 @@
     "ios": "expo start --ios",
     "web": "expo start --web",
     "build": "expo build",
+    "eas:build:android": "eas build --platform android --profile production",
+    "eas:build:ios": "eas build --platform ios --profile production",
+    "eas:build:dev": "eas build --profile development",
+    "eas:submit:android": "eas submit -p android --latest",
+    "eas:submit:ios": "eas submit -p ios --latest",
     "test": "jest"
   },
   "dependencies": {
@@ -31,8 +36,7 @@
     "lucide-react-native": "^0.0.39",
     "react-native-svg": "^13.6.0",
     "react-native-chart-kit": "^6.12.0",
-  "expo-auth-session": "^4.4.0",
-  "expo-secure-store": "^12.3.0",
+    "expo-secure-store": "^12.3.0",
   "expo-av": "^13.2.0",
   "expo-file-system": "^15.2.2",
   "expo-sharing": "^12.2.1",

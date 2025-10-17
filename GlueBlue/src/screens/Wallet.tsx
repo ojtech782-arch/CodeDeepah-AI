@@ -1,7 +1,7 @@
 import React, { useEffect } from 'react';
 import { View, Text, Button, FlatList, StyleSheet } from 'react-native';
 import { useDispatch, useSelector } from 'react-redux';
-import { fetchWalletData, selectWallet } from '../store/slices/walletSlice';
+import { fetchWalletData, fetchTransactions, selectWallet } from '../store/slices/walletSlice';
 import { convertCurrency } from '../utils/currency';
 
 const Wallet = () => {
@@ -10,6 +10,7 @@ const Wallet = () => {
 
   useEffect(() => {
     dispatch(fetchWalletData());
+    dispatch(fetchTransactions());
   }, [dispatch]);
 
   const handleCurrencyConversion = (amount, currency) => {
@@ -29,8 +30,9 @@ const Wallet = () => {
           </View>
         )}
       />
-      <Button title="Add Funds" onPress={() => {/* Navigate to add funds screen */}} />
-      <Button title="Withdraw" onPress={() => {/* Navigate to withdraw screen */}} />
+      <Button title="Add Funds" onPress={() => { navigation.navigate('FundWallet'); }} />
+      <Button title="Create Recipient" onPress={() => { navigation.navigate('CreateRecipient'); }} />
+      <Button title="Transfer" onPress={() => { navigation.navigate('InitiateTransfer'); }} />
     </View>
   );
 };

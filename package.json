@@ -1,0 +1,16 @@
+{
+  "name": "code-deepah-ai-monorepo",
+  "version": "0.1.0",
+  "private": true,
+  "devDependencies": {
+    "concurrently": "^8.2.0"
+  },
+  "scripts": {
+    "start": "concurrently \"npm:server\" \"npm:client\"",
+    "server": "npm --prefix ./server run dev",
+    "client": "npm --prefix ./GlueBlue start",
+    "client:web": "npm --prefix ./GlueBlue run web",
+    "client:android": "npm --prefix ./GlueBlue run android",
+    "client:ios": "npm --prefix ./GlueBlue run ios"
+  }
+}

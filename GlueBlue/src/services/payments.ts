@@ -12,6 +12,21 @@ export async function createPaypalOrder(userId: string, amountUSD: number) {
   return res.data;
 }
 
+export async function createRecipient({ userId, name, account_number, bank_code, currency = 'NGN' }: any) {
+  const res = await axios.post(`${API_URL}/payments/paystack/recipient`, { userId, name, account_number, bank_code, currency });
+  return res.data;
+}
+
+export async function fetchRecipients(userId: string) {
+  const res = await axios.get(`${API_URL}/recipients?userId=${userId}`);
+  try { return (res.data.recipients || []); } catch (e) { return []; }
+}
+
+export async function initiateTransfer({ userId, recipient, amountNGN, idempotencyKey }: any) {
+  const res = await axios.post(`${API_URL}/payments/paystack/transfer`, { userId, recipient, amountNGN, idempotencyKey });
+  return res.data;
+}
+
 export async function verifyPayment(provider: 'paystack' | 'paypal', reference: string) {
   if (provider === 'paystack') {
     const res = await axios.post(`${API_URL}/payments/paystack/verify`, { reference });

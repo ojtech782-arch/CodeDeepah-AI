@@ -6,6 +6,11 @@ import MessagingScreen from '../screens/Messaging';
 import NotificationsScreen from '../screens/Notifications';
 import WalletScreen from '../screens/Wallet';
 import DashboardScreen from '../screens/Dashboard';
+import FundWallet from '../screens/FundWallet';
+import CreateRecipient from '../screens/CreateRecipient';
+import InitiateTransfer from '../screens/InitiateTransfer';
+import WebViewModal from '../screens/WebViewModal';
+import { createNativeStackNavigator } from '@react-navigation/native-stack';
 
 const Tab = createBottomTabNavigator();
 
@@ -57,5 +62,19 @@ const BottomTabs = () => {
     </Tab.Navigator>
   );
 };
+
+const Stack = createNativeStackNavigator();
+
+const AppNavigator = () => {
+  return (
+    <Stack.Navigator screenOptions={{ headerShown: false }}>
+      <Stack.Screen name="Tabs" component={BottomTabs} />
+      <Stack.Screen name="FundWallet" component={FundWallet} />
+      <Stack.Screen name="CreateRecipient" component={CreateRecipient} />
+      <Stack.Screen name="InitiateTransfer" component={InitiateTransfer} />
+      <Stack.Screen name="WebViewModal" component={WebViewModal} />
+    </Stack.Navigator>
+  );
+}
 
 export default BottomTabs;

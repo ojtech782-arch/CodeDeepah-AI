@@ -1,0 +1,16 @@
+node_modules
+**/build
+**/*.keystore
+**/*.jks
+*.log
+.env
+.env.*
+.expo
+.expo-shared
+android
+ios
+.DS_Store
+.vscode
+.idea
+coverage
+test-results

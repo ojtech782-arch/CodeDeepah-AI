@@ -23,6 +23,15 @@ const transactions = new Map(Object.entries(storage.getTransactions()));
 const recipients = new Map(Object.entries(storage.getRecipients()));
 const wallets = new Map(Object.entries(storage.getWallets()));
 
+// Try to use SQLite DB for wallets/transactions/recipients for more robust dev persistence
+let db = null;
+try {
+  db = require('./db');
+  console.log('SQLite DB loaded');
+} catch (e) {
+  console.warn('SQLite DB not available, using file-based storage', e.message);
+}
+
 io.on('connection', (socket) => {
   console.log('client connected', socket.id);
 
@@ -120,8 +129,29 @@ app.post('/payments/paystack/verify', async (req, res) => {
     const tx = transactions.get(reference) || { reference };
     tx.status = status;
     tx.paystack = data.data;
+    // amount that was initialized may be in tx.amountNGN or in paystack data
+    const amountNGN = tx.amountNGN || Math.round((data.data.amount || 0) / 100);
     transactions.set(reference, tx);
     storage.saveTransactions(Object.fromEntries(transactions));
+
+    // if successful, credit user's wallet
+    if (status === 'success') {
+      const userId = tx.userId || data.data.metadata?.userId;
+      if (userId) {
+        if (db) {
+          const w = db.getWallet(userId);
+          const newBal = (w.balanceNGN || 0) + (amountNGN || 0);
+          db.upsertWallet(userId, { balanceNGN: newBal, balanceUSD: (newBal/NGN_RATE).toFixed(2) });
+        } else {
+          const walletsData = storage.getWallets();
+          const w = walletsData[userId] || { balanceNGN: 0, balanceUSD: 0 };
+          w.balanceNGN = (w.balanceNGN || 0) + (amountNGN || 0);
+          walletsData[userId] = w;
+          storage.saveWallets(walletsData);
+        }
+      }
+    }
+
     res.send({ ok: true, transaction: tx });
   } catch (e) {
     console.error('paystack verify error', e?.response?.data || e.message);
@@ -137,9 +167,11 @@ app.post('/payments/paystack/recipient', async (req, res) => {
     const r = await axios.post('https://api.paystack.co/transferrecipient', payload, { headers: { Authorization: `Bearer ${PAYSTACK_SECRET}` } });
     const data = r.data;
     const code = data.data.recipient_code;
-    const rec = { recipientCode: code, details: data.data };
+    const rec = { recipientCode: code, details: data.data, name, account_number, bank_code, currency };
     recipients.set(code, rec);
     storage.saveRecipients(Object.fromEntries(recipients));
+    // persist to DB if available
+    if (db) db.saveRecipient({ recipientCode: code, userId: req.body.userId || null, name, account_number, bank_code, currency, meta: data.data });
     res.send(data);
   } catch (e) {
     console.error('paystack recipient error', e?.response?.data || e.message);
@@ -150,16 +182,39 @@ app.post('/payments/paystack/recipient', async (req, res) => {
 // Initiate transfer
 app.post('/payments/paystack/transfer', async (req, res) => {
   try {
-    const { source = 'balance', reason = 'transfer', amountNGN, recipient } = req.body;
-    if (!recipient || !amountNGN) return res.status(400).send({ error: 'recipient_and_amount_required' });
+    const { source = 'balance', reason = 'transfer', amountNGN, recipient, userId, idempotencyKey } = req.body;
+    if (!recipient || !amountNGN || !userId) return res.status(400).send({ error: 'recipient_userid_and_amount_required' });
+    // idempotency: check existing
+    if (idempotencyKey) {
+      const txs = db ? db.getTransactionsForUser(userId) : Object.values(storage.getTransactions());
+      for (const t of txs) {
+        const meta = t.meta || {};
+        if (meta.idempotencyKey === idempotencyKey) return res.send({ ok: true, existing: t });
+      }
+    }
     const amountKobo = Math.round(amountNGN) * 100;
     const payload = { source, amount: amountKobo, recipient, reason };
     const r = await axios.post('https://api.paystack.co/transfer', payload, { headers: { Authorization: `Bearer ${PAYSTACK_SECRET}` } });
     const data = r.data;
     // store transaction record
-    const tx = { id: data.data.id, provider: 'paystack', reference: data.data.reference, status: data.data.status, meta: data.data };
-    transactions.set(data.data.reference || data.data.id, tx);
+    const record = { id: data.data.id, provider: 'paystack', reference: data.data.reference, status: data.data.status, meta: data.data, amountNGN, userId };
+    // persist
+    transactions.set(data.data.reference || data.data.id, record);
     storage.saveTransactions(Object.fromEntries(transactions));
+    if (db) db.addTransaction({ id: data.data.id, userId, provider: 'paystack', reference: data.data.reference, status: data.data.status, amountNGN, amountUSD: (amountNGN/NGN_RATE).toFixed(2), meta: data.data, createdAt: Date.now() });
+    // deduct from user's wallet if using balance
+    if (db) {
+      const w = db.getWallet(userId);
+      const newBal = Math.max(0, (w.balanceNGN || 0) - amountNGN);
+      db.upsertWallet(userId, { balanceNGN: newBal, balanceUSD: (newBal/NGN_RATE).toFixed(2) });
+    } else {
+      // file-based wallets
+      const walletsData = storage.getWallets();
+      const w = walletsData[userId] || { balanceNGN: 0, balanceUSD: 0 };
+      w.balanceNGN = Math.max(0, (w.balanceNGN || 0) - amountNGN);
+      walletsData[userId] = w;
+      storage.saveWallets(walletsData);
+    }
     res.send(data);
   } catch (e) {
     console.error('paystack transfer error', e?.response?.data || e.message);
@@ -227,15 +282,37 @@ app.get('/keys/:userId', (req, res) => {
 
 // Get wallet for user
 app.get('/wallet/:userId', (req, res) => {
+  if (db) {
+    const wallet = db.getWallet(req.params.userId || req.query.userId);
+    return res.send({ userId: req.params.userId, wallet });
+  }
   const walletsData = storage.getWallets();
   const wallet = walletsData[req.params.userId] || { balanceNGN: 0, balanceUSD: 0 };
   res.send({ userId: req.params.userId, wallet });
 });
 
 app.get('/transactions/:userId', (req, res) => {
+  if (db) {
+    const list = db.getTransactionsForUser(req.params.userId);
+    return res.send({ transactions: list });
+  }
   const txs = storage.getTransactions() || {};
   const list = Object.values(txs).filter(t => t.userId === req.params.userId || (t.meta && t.meta.userId === req.params.userId));
   res.send({ transactions: list });
+});
+
+// list recipients for a user
+app.get('/recipients', (req, res) => {
+  const userId = req.query.userId;
+  if (db) {
+    const stmt = db.db.prepare('SELECT * FROM recipients WHERE userId = ? ORDER BY createdAt DESC');
+    const rows = stmt.all(userId || null || '');
+    const list = rows.map(r => ({ recipientCode: r.recipientCode, name: r.name, account_number: r.account_number, bank_code: r.bank_code, currency: r.currency, meta: JSON.parse(r.meta || '{}') }));
+    return res.send({ recipients: list });
+  }
+  const all = storage.getRecipients() || {};
+  const list = Object.values(all).filter((r) => !userId || r.userId === userId);
+  res.send({ recipients: list });
 });
 
 const PORT = process.env.PORT || 3000;
